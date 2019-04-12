@@ -1,0 +1,83 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Générateur de feuille dominicale</title>
+</head>
+<body>
+    <form action="php/ctrl.php" method="post" target="_blank">
+    <h2>Entrez les données à utiliser pour générer la feuille dominicale:</h2>
+        <fieldset>
+            <legend><b>URLs du contenu externe:</b></legend>
+
+            <label for="calendarMainURL">Calendrier des messes:</label>
+                <input name="calendarMainURL" id="calendarMainURL" required type="url" value="https://calendar.google.com/calendar/ical/emf.theodia%40gmail.com/private-e5c4e839e2928a23876e3b0d5ee542fc/basic.ics" size="150">
+
+            <br><br>
+            <label for="calendarOtherURL">Calendrier d'autres évènements: (WIP)</label>
+                <input name="calendarOtherURL" id="calendarOtherURL" type="url" size="150" disabled>
+
+            <br><br>
+            <label>
+                <input name="templateURL" type="radio" value="https://drive.google.com/uc?authuser=0&id=1y3Ez-0OAhKFX-f-6mBqJDQ1r1bXL61pl&export=download" checked>
+                Template 1 : https://drive.google.com/uc?authuser=0&id=1y3Ez-0OAhKFX-f-6mBqJDQ1r1bXL61pl&export=download
+                </label>
+            <br>
+            <label>
+                <input name="templateURL" type="radio" value="https://drive.google.com/uc?authuser=0&id=1BQCpnjO92UtiiRb88203By4PtbfokRoL&export=download">
+                Template 2 : https://drive.google.com/uc?authuser=0&id=1BQCpnjO92UtiiRb88203By4PtbfokRoL&export=download
+                </label>
+            <br>
+            <label>
+                <input name="templateURL" type="radio" value="https://drive.google.com/uc?authuser=0&id=17PwDzzlVw5IVweNZwIn9D21XrJBdTiVR&export=download">
+                Template 3 : https://drive.google.com/uc?authuser=0&id=17PwDzzlVw5IVweNZwIn9D21XrJBdTiVR&export=download
+                </label>
+            <br><br>
+            <label for="logoURL">Logo:</label>
+                <input name="logoURL" id="logoURL" type="url" value="https://www.ministryvoice.com/wp-content/uploads/2018/02/bible-cross-logo.png" size="150">
+        </fieldset>
+
+        <br><br>
+
+        <fieldset>
+            <legend><b>Informations de l'organisation:</b></legend>
+
+            <label for="organisationName">Nom:</label>
+                <input name="organisationName" id="organisationName" type="text" value="Paroisse St-Maurice">
+
+            <br><br>
+            <label for="organisationLocation">Ville:</label>
+                <input name="organisationLocation" id="organisationLocation" type="text" value="1700 Fribourg">
+
+            <br><br>
+            <label for="organisationAddress">Adresse:</label>
+                <input name="organisationAddress" id="organisationAddress" type="text" value="Rue Lenda 1">
+
+            <br><br>
+            <label for="organisationPhoneNbr">Numéro de téléphone:</label>
+                <input name="organisationPhoneNbr" id="organisationPhoneNbr" type="text" value="+41 78 737 83 63">
+        </fieldset>
+
+        <br><br>
+        <fieldset>
+            <legend><b>Format des dates des évènements:</b></legend>
+            <label>
+                <input name="dateFormat" value="l d F" type="radio" checked>
+                Friday 01 March
+            </label><br>
+
+            <label>
+                <input name="dateFormat" value="d/m/y" type="radio">
+                01/03/19
+            </label><br>
+
+            <label>
+                <input name="dateFormat" value="d/m/Y" type="radio">
+                01/03/2019
+            </label>
+        </fieldset>
+        <br><br>
+        <input type="submit" value="Générer le document">
+    </form>
+</body>
+</html>

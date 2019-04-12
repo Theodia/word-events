@@ -1,0 +1,9 @@
+{
+  "require": {
+    "phpoffice/phpword": "v*",
+    "ext-xsl": "*",
+    "ext-dom": "*",
+    "om/icalparser": "v0.2.3",
+    "rkorebrits/htmltoopenxml": "*"
+  }
+}
