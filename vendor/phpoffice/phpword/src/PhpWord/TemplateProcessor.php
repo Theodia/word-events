@@ -155,9 +155,9 @@ class TemplateProcessor
      * @param string $xml
      * @param \XSLTProcessor $xsltProcessor
      *
-     * @throws \PhpOffice\PhpWord\Exception\Exception
-     *
      * @return string
+     *@throws Exception
+     *
      */
     protected function transformSingleXml($xml, $xsltProcessor)
     {
@@ -205,7 +205,7 @@ class TemplateProcessor
      * @param array $xslOptions
      * @param string $xslOptionsUri
      *
-     * @throws \PhpOffice\PhpWord\Exception\Exception
+     * @throws Exception
      */
     public function applyXslStyleSheet($xslDomDocument, $xslOptions = array(), $xslOptionsUri = '')
     {
@@ -595,7 +595,7 @@ class TemplateProcessor
      * @param string $search
      * @param int $numberOfClones
      *
-     * @throws \PhpOffice\PhpWord\Exception\Exception
+     * @throws Exception
      */
     public function cloneRow($search, $numberOfClones)
     {
@@ -723,9 +723,9 @@ class TemplateProcessor
     /**
      * Saves the result document.
      *
-     * @throws \PhpOffice\PhpWord\Exception\Exception
-     *
      * @return string
+     *@throws Exception
+     *
      */
     public function save()
     {
@@ -916,9 +916,9 @@ class TemplateProcessor
      *
      * @param int $offset
      *
-     * @throws \PhpOffice\PhpWord\Exception\Exception
-     *
      * @return int
+     *@throws Exception
+     *
      */
     protected function findRowStart($offset)
     {

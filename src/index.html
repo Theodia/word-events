@@ -60,21 +60,24 @@
 
         <br><br>
         <fieldset>
-            <legend><b>Format des dates des évènements:</b></legend>
-            <label>
-                <input name="dateFormat" value="l d F" type="radio" checked>
-                Friday 01 March
-            </label><br>
-
-            <label>
-                <input name="dateFormat" value="d/m/y" type="radio">
-                01/03/19
-            </label><br>
-
-            <label>
-                <input name="dateFormat" value="d/m/Y" type="radio">
-                01/03/2019
-            </label>
+            <legend><b>Format des dates et heure des événements:</b></legend>
+            <label for="locales">Langue:</label>
+            <select name="locales" id="locales">
+                <option value="ar-sa">Arabic - Saudi Arabia</option>
+                <option value="zh-cn">Chinese - China</option>
+                <option value="nl-nl">Dutch - Netherlands</option>
+                <option value="en-us">English - United States</option>
+                <option value="fr-ch" selected>French - Switzerland</option>
+                <option value="ru">Russian</option>
+            </select>
+            <br><br>
+            <label for="datePattern">Format des dates:</label>
+            <input name="datePattern" id="datePattern" type="text" required value="dd MMMM">
+            <br><br>
+            <label for="timePattern">Format des heures:</label>
+            <input name="timePattern" id="timePattern" type="text" required value="HH:mm">
+            <br><br>
+            <a href="http://userguide.icu-project.org/formatparse/datetime" target="_blank">Formatting Dates and Times - ICU User Guide (tableau avec symboles de formattage)</a>
         </fieldset>
         <br><br>
         <input type="submit" value="Générer le document">

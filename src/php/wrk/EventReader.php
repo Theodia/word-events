@@ -9,52 +9,56 @@
 require_once '../../vendor/autoload.php';
 include_once 'beans/Event.php';
 
-
+const EVENT_START_DATE = 'DTSTART';
+const EVENT_SUMMARY = 'SUMMARY';
+const EVENT_LOCATION = 'LOCATION';
+const EVENT_DESCRIPTION = 'DESCRIPTION';
+const EVENT_IS_DATE_EVENT = 'isDateEvent';
 /**
- * Class IcalReader Permet de récupérer des évènements d'un calendrier électronique dans des objets Event.
+ * Class EventReader Permet de récupérer des évènements d'un calendrier électronique dans des objets Event.
  */
 class EventReader {
 	
 	private $icalParser;
-	private $dateFormat;
 	
 	/**
-	 * IcalReader constructor.
-	 * @param String $dateFormat Format de la date choisi par l'utilisateur.
+	 * EventReader constructor.
 	 */
-	public function __construct($dateFormat) {
+	public function __construct() {
 		$this->icalParser = new om\IcalParser();
-		$this->dateFormat = $dateFormat;
 	}
 	
 	/**
 	 * Utilise la classe IcalParser pour parser le fichier ical, crée un objet Event pour chaque évènement du calendrier
 	 * et renvoie le tableau contenant les objets Event.
 	 * @param String $icalURL URL menant à un calendrier éléctronique contenant les évènements à lire.
+	 * @param String $locale Code de la région linguistique.
+	 * @param String $datePattern Paterne de formatage de la date.
+	 * @param String $timePattern Paterne de formatage de l'heure.
 	 * @return array Tableau contenant la liste des évènements 'timeEvents' et la liste des évènements du jour 'dateEvents'.
-	 * @throws Exception
+	 * @throws Exception Si une erreur survient durant la lecture du fichier ical.
 	 */
-	public function getEvents($icalURL) {
+	public function getEvents($icalURL, $locale, $datePattern, $timePattern) {
 		
 		$this->icalParser->parseFile($icalURL);
 		$eventsData = $this->icalParser->getSortedEvents();
 		$dateEvents = [];
 		$timeEvents = [];
 		foreach ($eventsData as $eventData) {
-			$locationTab = explode(', ', $eventData['LOCATION']);
+			$locationTab = explode(', ', $eventData[EVENT_LOCATION]);
 			$location = $locationTab[0];
 			
-			$newEvent = new Event($this->dateFormat, $eventData['DTSTART'], $location, $eventData['SUMMARY'], $eventData['DESCRIPTION']);
+			$newEvent = new Event($locale, $datePattern, $timePattern,  $eventData[EVENT_START_DATE], $location, $eventData[EVENT_SUMMARY], $eventData[EVENT_DESCRIPTION]);
 
-			if ($eventData['isDateEvent']){
+			if ($eventData[EVENT_IS_DATE_EVENT]){
 				$dateEvents[] = $newEvent;
 			} else {
 				$timeEvents[] = $newEvent;
 			}
 		}
 		return [
-			'timeEvents' => $timeEvents,
-			'dateEvents' => $dateEvents
+			TIME_EVENTS => $timeEvents,
+			DATE_EVENTS => $dateEvents
 		];
 	}
 	
