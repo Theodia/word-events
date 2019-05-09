@@ -452,6 +452,7 @@ class IcalParser {
 	 * @throws \Exception If there isn't any event in the given date range
 	 */
 	public function getSortedEvents($stringDateBegin = null, $stringDateEnd = null) {
+		$result = [];
 		if ($events = $this->getEvents()) {
 			$newEvents = [];
 			
@@ -486,6 +487,7 @@ class IcalParser {
 					$dateEnd = new DateTime($stringDateEnd . ' 23:59');
 				
 				if ($dateBegin != false && $dateEnd != false){
+					
 					$resultEvents = [];
 					
 					//only keep events in range
@@ -495,17 +497,21 @@ class IcalParser {
 						}
 					}
 					if (sizeof($resultEvents) > 0) {
-						return $resultEvents;
-						
+						$result['noEvents'] = false;
+						$result['events'] = $resultEvents;
 					} else {
-						throw new \Exception("La fenêtre de dates donnée ne contient pas d'événement.");
+						$result['noEvents'] = true;
 					}
+					return $result;
 				}
 			} else {
-				return $newEvents;
+				$result['noEvents'] = false;
+				$result['events'] = $newEvents;
+				return $result;
 			}
 		}
-		return [];
+		$result['noEvents'] = true;
+		return $result;
 	}
 
 	/**

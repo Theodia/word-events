@@ -42,11 +42,18 @@ class EventReader {
 	 */
 	public function getEvents($icalTab, $locale, $datePattern, $timePattern, $dateBegin = null, $dateEnd = null) {
 		$allEventsData = [];
-		
+		$noEvents = true;
 		foreach ($icalTab as $icalURL) {
 			$this->icalParser->parseFile($icalURL);
-			$eventsData = $this->icalParser->getSortedEvents($dateBegin, $dateEnd);
-			$allEventsData = array_merge($allEventsData, $eventsData);
+			$readResult = $this->icalParser->getSortedEvents($dateBegin, $dateEnd);
+			if (!$readResult['noEvents']){
+				$noEvents = false;
+				$eventsData = $readResult['events'];
+				$allEventsData = array_merge($allEventsData, $eventsData);
+			}
+		}
+		if ($noEvents){
+			throw new Exception("La fenêtre de dates donnée ne contient pas d'événement.");
 		}
 		
 		usort(
