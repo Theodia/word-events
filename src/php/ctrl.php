@@ -13,6 +13,9 @@ const PARAM_MAIN_CAL_URL = "calendarMainURL";
 const PARAM_OTHER_CAL_URL = "calendarOtherURL";
 const PARAM_LOGO_URL = "logoURL";
 
+const PARAM_DATE_BEGIN = "dateBegin";
+const PARAM_DATE_END = "dateEnd";
+
 const PARAM_ORG_NAME = "organisationName";
 const PARAM_ORG_LOCATION = "organisationLocation";
 const PARAM_ORG_ADDRESS = "organisationAddress";
@@ -52,32 +55,42 @@ if (!empty($_POST[PARAM_TEMPLATE_URL]) && !empty($_POST[PARAM_MAIN_CAL_URL]) && 
 		TAG_ORG_PHONE => $_POST[PARAM_ORG_PHONE],
 	];
 	
+	$icalTab = [$_POST[PARAM_MAIN_CAL_URL]];
+	if (!empty($_POST[PARAM_OTHER_CAL_URL])) {
+		$icalTab[] = $_POST[PARAM_OTHER_CAL_URL];
+	}
+	
 	//Appel de la classe EventReader pour lire les événements et créer les objets Event
 	try {
-		$mainEvents = $eventReader->getEvents($_POST[PARAM_MAIN_CAL_URL], $_POST[PARAM_LOCALE], $_POST[PARAM_DATE_PATTERN], $_POST[PARAM_TIME_PATTERN]);
+		$mainEvents = $eventReader->getEvents($icalTab, $_POST[PARAM_LOCALE], $_POST[PARAM_DATE_PATTERN], $_POST[PARAM_TIME_PATTERN], $_POST[PARAM_DATE_BEGIN], $_POST[PARAM_DATE_END]);
 		
-		if (!empty($_POST[PARAM_OTHER_CAL_URL])) {
-			$otherEvents = $eventReader->getEvents($_POST[PARAM_OTHER_CAL_URL], $_POST[PARAM_LOCALE], $_POST[PARAM_DATE_PATTERN], $_POST[PARAM_TIME_PATTERN]);
-		} else {
-			$otherEvents = null;
-		}
 	} catch (Exception $e) {
-		$errorMessage = $e;
+		$errorMessage = $e->getMessage();
+		$errorLine = $e->getLine();
+		$errorFile = $e->getFile();
 		$gotException = true;
 	}
 	
-	//Appel de la classe DocGenerator pour générer le document avec les données des Event et les paramètres donnés
-	try {
-		$docGenerator->generateDoc($mainEvents, $otherEvents, $organisationInfo, RESULT_DIR . FILE_NAME);
-	} catch (CopyFileException $e) {
-		$errorMessage = $e;
-		$gotException = true;
-	} catch (CreateTemporaryFileException $e) {
-		$errorMessage = $e;
-		$gotException = true;
-	} catch (Exception $e) {
-		$errorMessage = $e;
-		$gotException = true;
+	if (!$gotException){
+		//Appel de la classe DocGenerator pour générer le document avec les données des Event et les paramètres donnés
+		try {
+			$docGenerator->generateDoc($mainEvents, $organisationInfo, RESULT_DIR . FILE_NAME);
+		} catch (CopyFileException $e) {
+			$errorMessage = $e->getMessage();
+			$errorLine = $e->getLine();
+			$errorFile = $e->getFile();
+			$gotException = true;
+		} catch (CreateTemporaryFileException $e) {
+			$errorMessage = $e->getMessage();
+			$errorLine = $e->getLine();
+			$errorFile = $e->getFile();
+			$gotException = true;
+		} catch (Exception $e) {
+			$errorMessage = $e->getMessage();
+			$errorLine = $e->getLine();
+			$errorFile = $e->getFile();
+			$gotException = true;
+		}
 	}
 	
 	//Si on a pas reçu d'Exception et que le document de résultat existe, on crée et envoie l'en-tête et on lit le fichier
@@ -93,7 +106,7 @@ if (!empty($_POST[PARAM_TEMPLATE_URL]) && !empty($_POST[PARAM_MAIN_CAL_URL]) && 
 		readfile(RESULT_DIR . FILE_NAME);
 	} else {
 		header('HTTP/1.0 500 Internal Server Error');
-		echo ("HTTP Error 500 : " . $errorMessage);
+		echo ("HTTP Error 500 : " . $errorMessage . " dans le fichier " . substr($errorFile, 47)  . " à la ligne " . $errorLine);
 	}
 } else {
 	header('HTTP/1.0 400 Bad Request');

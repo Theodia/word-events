@@ -31,20 +31,33 @@ class EventReader {
 	/**
 	 * Utilise la classe IcalParser pour parser le fichier ical, crée un objet Event pour chaque évènement du calendrier
 	 * et renvoie le tableau contenant les objets Event.
-	 * @param String $icalURL URL menant à un calendrier éléctronique contenant les évènements à lire.
+	 * @param array $icalTab
 	 * @param String $locale Code de la région linguistique.
 	 * @param String $datePattern Paterne de formatage de la date.
 	 * @param String $timePattern Paterne de formatage de l'heure.
+	 * @param String $dateBegin date de début de lecture.
+	 * @param String $dateEnd date de fin de lecture.
 	 * @return array Tableau contenant la liste des évènements 'timeEvents' et la liste des évènements du jour 'dateEvents'.
 	 * @throws Exception Si une erreur survient durant la lecture du fichier ical.
 	 */
-	public function getEvents($icalURL, $locale, $datePattern, $timePattern) {
+	public function getEvents($icalTab, $locale, $datePattern, $timePattern, $dateBegin = null, $dateEnd = null) {
+		$allEventsData = [];
 		
-		$this->icalParser->parseFile($icalURL);
-		$eventsData = $this->icalParser->getSortedEvents();
+		foreach ($icalTab as $icalURL) {
+			$this->icalParser->parseFile($icalURL);
+			$eventsData = $this->icalParser->getSortedEvents($dateBegin, $dateEnd);
+			$allEventsData = array_merge($allEventsData, $eventsData);
+		}
+		
+		usort(
+			$allEventsData, function ($a, $b) {
+			return $a['DTSTART'] > $b['DTSTART'];
+		}
+		);
+		
 		$dateEvents = [];
 		$timeEvents = [];
-		foreach ($eventsData as $eventData) {
+		foreach ($allEventsData as $eventData) {
 			$locationTab = explode(', ', $eventData[EVENT_LOCATION]);
 			$location = $locationTab[0];
 			
@@ -56,6 +69,7 @@ class EventReader {
 				$timeEvents[] = $newEvent;
 			}
 		}
+		
 		return [
 			TIME_EVENTS => $timeEvents,
 			DATE_EVENTS => $dateEvents

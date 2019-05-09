@@ -1,6 +1,12 @@
 <?php
 
 namespace om;
+use DateInterval;
+use DateTime;
+use DateTimeZone;
+use InvalidArgumentException;
+use PhpOffice\PhpWord\Exception\Exception;
+
 /**
  * Copyright (c) 2004-2015 Roman Ožana (http://www.omdesign.cz)
  *
@@ -8,7 +14,7 @@ namespace om;
  */
 class IcalParser {
 
-	/** @var \DateTimeZone */
+	/** @var DateTimeZone */
 	public $timezone;
 
 	/** @var array */
@@ -48,16 +54,16 @@ class IcalParser {
 	 * @param null $callback
 	 * @param boolean $add if true the parsed string is added to existing data
 	 * @return array|null
-	 * @throws \InvalidArgumentException
+	 * @throws InvalidArgumentException
 	 * @throws \Exception
 	 */
 	public function parseString($string, $callback = null, $add = false) {
 		if ($add === null){
-			$this->data = [];
+			$this->data = array();
 		}
 		
 		if (!preg_match('/BEGIN:VCALENDAR/', $string)) {
-			throw new \InvalidArgumentException('Invalid ICAL data format');
+			throw new InvalidArgumentException('Invalid ICAL data format');
 		}
 
 		$counters = [];
@@ -91,7 +97,7 @@ class IcalParser {
 					if (!empty($event['RECURRENCE-ID'])) {
 						$this->data['_RECURRENCE_IDS'][$event['RECURRENCE-ID']] = $event;
 					}
-
+					
 					continue 2; // while
 					break;
 				case 'END:DAYLIGHT':
@@ -173,7 +179,7 @@ class IcalParser {
 					$value = $matches[1];
 				}
 				$value = $this->toTimezone($value);
-				$this->timezone = new \DateTimeZone($value);
+				$this->timezone = new DateTimeZone($value);
 			}
 
 			// have some middle part ?
@@ -184,7 +190,7 @@ class IcalParser {
 						$match['value'] = trim($match['value'], "'\"");
 						$match['value'] = $this->toTimezone($match['value']);
 						try {
-							$middle[$match['key']] = $timezone = new \DateTimeZone($match['value']);
+							$middle[$match['key']] = $timezone = new DateTimeZone($match['value']);
 						} catch (\Exception $e) {
 							$middle[$match['key']] = $match['value'];
 						}
@@ -201,10 +207,10 @@ class IcalParser {
 		if (in_array($key, ['DTSTAMP', 'LAST-MODIFIED', 'CREATED', 'DTSTART', 'DTEND'], true)) {
 			try {
 				if (strlen($value) === 8) {
-						$value = ['isDateEvent' => true, 'date' => new \DateTime($value, ($timezone ?: $this->timezone))];
+						$value = ['isDateEvent' => true, 'date' => new DateTime($value, ($timezone ?: $this->timezone))];
 						
 				} else{
-					$value = ['isDateEvent' => false, 'date' => new \DateTime($value, ($timezone ?: $this->timezone))];
+					$value = ['isDateEvent' => false, 'date' => new DateTime($value, ($timezone ?: $this->timezone))];
 				}
 				
 			} catch (\Exception $e) {
@@ -214,7 +220,7 @@ class IcalParser {
 			$values = [];
 			foreach (explode(',', $value) as $singleValue) {
 				try {
-					$values[] = new \DateTime($singleValue, ($timezone ?: $this->timezone));
+					$values[] = new DateTime($singleValue, ($timezone ?: $this->timezone));
 				} catch (\Exception $e) {
 					// pass
 				}
@@ -232,7 +238,7 @@ class IcalParser {
 			foreach ($matches as $match) {
 				if (in_array($match['key'], ['UNTIL'])) {
 					try {
-						$value[$match['key']] = new \DateTime($match['value'], ($timezone ?: $this->timezone));
+						$value[$match['key']] = new DateTime($match['value'], ($timezone ?: $this->timezone));
 					} catch (\Exception $e) {
 						$value[$match['key']] = $match['value'];
 					}
@@ -304,7 +310,7 @@ class IcalParser {
 		if ($until === false) {
 			//forever... limit to 3 years
 			$end = clone($event['DTSTART']['date']);
-			$end->add(new \DateInterval('P3Y')); // + 3 years
+			$end->add(new DateInterval('P3Y')); // + 3 years
 			$recurring->setUntil($end);
 			$until = $recurring->getUntil();
 		}
@@ -314,14 +320,14 @@ class IcalParser {
 		$recurrenceTimestamps = $frequency->getAllOccurrences();
 		$recurrences = [];
 		foreach ($recurrenceTimestamps as $recurrenceTimestamp) {
-			$tmp = new \DateTime('now', $event['DTSTART']['date']->getTimezone());
+			$tmp = new DateTime('now', $event['DTSTART']['date']->getTimezone());
 			$tmp->setTimestamp($recurrenceTimestamp);
 
 			$recurrenceIDDate = $tmp->format('Ymd');
 			$recurrenceIDDateTime = $tmp->format('Ymd\THis');
 			if (empty($this->data['_RECURRENCE_IDS'][$recurrenceIDDate]) &&
 				empty($this->data['_RECURRENCE_IDS'][$recurrenceIDDateTime])) {
-				$gmtCheck = new \DateTime("now", new \DateTimeZone('Europe/Zurich'));
+				$gmtCheck = new DateTime("now", new DateTimeZone('Europe/Zurich'));
 				$gmtCheck->setTimestamp($recurrenceTimestamp);
 				$recurrenceIDDateTimeZ = $gmtCheck->format('Ymd\THis\Z');
 				if (empty($this->data['_RECURRENCE_IDS'][$recurrenceIDDateTimeZ])) {
@@ -436,17 +442,20 @@ class IcalParser {
 	public function getTimezones() {
 		return isset($this->data['VTIMEZONE']) ? $this->data['VTIMEZONE'] : [];
 	}
-
+	
 	/**
 	 * Return sorted event list as array
 	 *
+	 * @param String $stringDateBegin
+	 * @param String $stringDateEnd
 	 * @return array
+	 * @throws \Exception If there isn't any event in the given date range
 	 */
-	public function getSortedEvents() {
+	public function getSortedEvents($stringDateBegin = null, $stringDateEnd = null) {
 		if ($events = $this->getEvents()) {
 			$newEvents = [];
+			
 			foreach ($events as $event) {
-				
 				$newEvent = [
 					'DTSTART' => null,
 					'LOCATION' => null,
@@ -455,7 +464,7 @@ class IcalParser {
 					'isDateEvent' => null
 				];
 				
-				$event['DTSTART']['date']->setTimeZone(new \DateTimeZone(date_default_timezone_get()));
+				$event['DTSTART']['date']->setTimeZone(new DateTimeZone(date_default_timezone_get()));
 				
 				$newEvent['DTSTART'] = $event['DTSTART']['date'];
 				$newEvent['LOCATION'] = $event['LOCATION'];
@@ -470,7 +479,31 @@ class IcalParser {
 				return $a['DTSTART'] > $b['DTSTART'];
 			}
 			);
-			return $newEvents;
+			//check if dates are given
+			if (!empty($stringDateBegin) && !empty($stringDateEnd)){
+				
+					$dateBegin = new DateTime($stringDateBegin);
+					$dateEnd = new DateTime($stringDateEnd . ' 23:59');
+				
+				if ($dateBegin != false && $dateEnd != false){
+					$resultEvents = [];
+					
+					//only keep events in range
+					foreach ($newEvents as $newEvent) {
+						if ($newEvent['DTSTART'] >= $dateBegin && $newEvent['DTSTART'] <= $dateEnd){
+							$resultEvents[] = $newEvent;
+						}
+					}
+					if (sizeof($resultEvents) > 0) {
+						return $resultEvents;
+						
+					} else {
+						throw new \Exception("La fenêtre de dates donnée ne contient pas d'événement.");
+					}
+				}
+			} else {
+				return $newEvents;
+			}
 		}
 		return [];
 	}

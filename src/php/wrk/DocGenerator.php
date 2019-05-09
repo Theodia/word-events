@@ -35,25 +35,19 @@ class DocGenerator {
 	 * Prend des tableaux d'événements et crée un document .docx avec les données des événements et les données de la
 	 * Paroisse.
 	 * @param Event[][] $mainEvents Tableau contenant les objets Event des événements lithuriques (messes, ...).
-	 * @param Event[][] $otherEvents Tableau contenant les objets Event des autres événements (concerts, ...).
 	 * @param string[] $organisationInfo Tableau contenant les informations en String de la Paroisse.
 	 * @param String $fileName Chemin et nom du fichier de résultat à sauver.
 	 * @throws CopyFileException Si une erreur survient durant la copie du fichier template.
 	 * @throws CreateTemporaryFileException Si une erreur survient durant la création du fichier temporaire.
 	 * @throws \PhpOffice\PhpWord\Exception\Exception Si une erreur survient durant le remplacement d'un tag par une image ou dans la sauvegarde du fichier.
-	 * @throws Exception Si une erreur survient dans le clonage des cellules de tableau ou dans le remplacement des tags.
+	 * @throws Exception Si le clonage des cellules échoue.
 	 */
-	public function generateDoc($mainEvents, $otherEvents, $organisationInfo, $fileName) {
+	public function generateDoc($mainEvents, $organisationInfo, $fileName) {
 		$infosKeys = array_keys($organisationInfo);
 		$templateProcessor = new PhpOffice\PhpWord\TemplateProcessor($this->templateURL);
 		$initialDocVariables = $templateProcessor->getVariables();
-        if ($otherEvents !== null){
-        	
-            $events = $otherEvents[TIME_EVENTS];
-	        
-        } else {
-            $events = $mainEvents[TIME_EVENTS];
-        }
+  
+		$events = $mainEvents[TIME_EVENTS];
 
         $dateEvents = $mainEvents[DATE_EVENTS];
         
