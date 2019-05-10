@@ -3,6 +3,59 @@
 <head>
     <meta charset="UTF-8">
     <title>Générateur de feuille dominicale</title>
+    <script src="../jQuery/lib/jquery-3.4.1.min.js"></script>
+    <script type="text/javascript">
+        window.onload = function () {
+            $('input[type="radio"]').on("click", function () {
+                $('#templateField').val("");
+                $('#templateField').removeAttr("name");
+            });
+
+            $("#templateField").on("click", function () {
+                $('input[type="radio"]').prop('checked', false);
+                $('#templateField').attr("name", "templateURL");
+            });
+
+            let now = new Date();
+            let finalNow;
+            if (now.getMonth() + 1 >= 10){
+                if (now.getDate() >= 10){
+                    finalNow = now.getFullYear() + "-" + (now.getMonth() +1 ) + "-" + now.getDate();
+                } else{
+                    finalNow = now.getFullYear() + "-" + (now.getMonth() +1 ) + "-0" + now.getDate();
+                }
+
+            }else {
+                if (now.getDate() >= 10){
+                    finalNow = now.getFullYear() + "-0" + (now.getMonth() +1 ) + "-" + now.getDate();
+                } else{
+                    finalNow = now.getFullYear() + "-0" + (now.getMonth() +1 ) + "-0" + now.getDate();
+                }
+            }
+
+
+            let oneWeekAfter = new Date(now.getTime() + 7 * 24 * 60 * 60 * 1000);
+            let finalOneWeekAfter;
+            if (oneWeekAfter.getMonth() + 1 >= 10){
+                if (oneWeekAfter.getDate() >= 10){
+                    finalOneWeekAfter = oneWeekAfter.getFullYear() + "-" + (oneWeekAfter.getMonth() +1 ) + "-" + oneWeekAfter.getDate();
+                } else{
+                    finalOneWeekAfter = oneWeekAfter.getFullYear() + "-" + (oneWeekAfter.getMonth() +1 ) + "-0" + oneWeekAfter.getDate();
+                }
+
+            }else {
+                if (now.getDate() >= 10){
+                    finalOneWeekAfter = oneWeekAfter.getFullYear() + "-0" + (oneWeekAfter.getMonth() +1 ) + "-" + oneWeekAfter.getDate();
+                } else{
+                    finalOneWeekAfter = oneWeekAfter.getFullYear() + "-0" + (oneWeekAfter.getMonth() +1 ) + "-0" + oneWeekAfter.getDate();
+                }
+            }
+            $("#dateBegin").val(finalNow);
+            $("#dateEnd").val(finalOneWeekAfter);
+        }
+
+
+    </script>
 </head>
 <body>
     <form action="php/ctrl.php" method="post" target="_blank">
@@ -32,6 +85,10 @@
                 <input name="templateURL" type="radio" value="https://drive.google.com/uc?authuser=0&id=17PwDzzlVw5IVweNZwIn9D21XrJBdTiVR&export=download" checked>
                 Template 3 : https://drive.google.com/uc?authuser=0&id=17PwDzzlVw5IVweNZwIn9D21XrJBdTiVR&export=download
                 </label>
+            <br>
+            <label>
+                Template 4 : <input type="url" size="150" id="templateField">
+            </label>
             <br><br>
             <label for="logoURL">Logo:</label>
                 <input name="logoURL" id="logoURL" type="url" value="https://www.ministryvoice.com/wp-content/uploads/2018/02/bible-cross-logo.png" size="150">
@@ -81,7 +138,12 @@
                 <option value="nl-nl">Dutch - Netherlands</option>
                 <option value="en-us">English - United States</option>
                 <option value="fr-ch" selected>French - Switzerland</option>
+                <option value="de-de" >German - Germany</option>
+                <option value="it-it" >Italian - Italy</option>
+                <option value="pl" >Polish</option>
+                <option value="pt-pt" >Portuguese - Portugal</option>
                 <option value="ru">Russian</option>
+                <option value="es-es">Spanish - Spain</option>
             </select>
             <br><br>
             <label for="datePattern">Format des dates:</label>
